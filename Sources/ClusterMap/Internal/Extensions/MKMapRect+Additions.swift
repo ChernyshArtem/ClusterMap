@@ -22,6 +22,8 @@ extension MKMapRect {
     }
 
     init(region: MKCoordinateRegion) {
+        self.init()
+        
         var topLeft = CLLocationCoordinate2D(
             latitude: min(region.center.latitude + (region.span.latitudeDelta / 2), 90),
             longitude: region.center.longitude - (region.span.longitudeDelta / 2)
@@ -31,35 +33,26 @@ extension MKMapRect {
             longitude: region.center.longitude + (region.span.longitudeDelta / 2)
         )
         
-        if topLeft.longitude < -180 || bottomRight.longitude > 180 {
-            let world = MKMapRect.world
-            
-            if topLeft.longitude < -180 {
-                topLeft.longitude += 360
-            }
-            if bottomRight.longitude > 180 {
-                bottomRight.longitude -= 360
-            }
-            let topLeftPoint = MKMapPoint(topLeft)
-            let bottomRightPoint = MKMapPoint(bottomRight)
-
-            self.init(
-                x: max(topLeftPoint.x, bottomRightPoint.x),
-                y: world.origin.y,
-                width: (world.maxX - max(topLeftPoint.x, bottomRightPoint.x)) + min(topLeftPoint.x, bottomRightPoint.x),
-                height: world.height
-            )
-            
-        } else {
-            let topLeftPoint = MKMapPoint(topLeft)
-            let bottomRightPoint = MKMapPoint(bottomRight)
-            
-            self.init(
-                x: min(topLeftPoint.x, bottomRightPoint.x),
-                y: min(topLeftPoint.y, bottomRightPoint.y),
-                width: max(topLeftPoint.x, bottomRightPoint.x) - min(topLeftPoint.x, bottomRightPoint.x),
-                height: max(topLeftPoint.y, bottomRightPoint.y) - min(topLeftPoint.y, bottomRightPoint.y)
-            )
+        if topLeft.longitude < -180 {
+            topLeft.longitude = safeDoubleLat(topLeft.longitude)
         }
+        if bottomRight.longitude > 180 {
+            bottomRight.longitude = safeDoubleLat(bottomRight.longitude)
+        }
+        
+        let topLeftPoint = MKMapPoint(topLeft)
+        let bottomRightPoint = MKMapPoint(bottomRight)
+        
+        self.init(
+            x: min(topLeftPoint.x, bottomRightPoint.x),
+            y: min(topLeftPoint.y, bottomRightPoint.y),
+            width: max(topLeftPoint.x, bottomRightPoint.x) - min(topLeftPoint.x, bottomRightPoint.x),
+            height: max(topLeftPoint.y, bottomRightPoint.y) - min(topLeftPoint.y, bottomRightPoint.y)
+        )
     }
+    
+    private func safeDoubleLat(_ n:Double) -> Double {
+        (n+180).remainder(dividingBy: 360) - 180
+    }
+        
 }
