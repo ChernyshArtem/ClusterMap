@@ -21,11 +21,15 @@ import Foundation
 /// }
 /// ```
 public protocol CoordinateIdentifiable {
-    /// The geographical coordinate of the object.
-    let coordinate: CLLocationCoordinate2D
+     /// The geographical coordinate of the object.
+     let coordinate: CLLocationCoordinate2D { get }
 
-    /// A Boolean value that determines whether the object should be included in clustering operations.
-    ///
-    /// The default value is `true`.
-    let shouldCluster: Bool = true
-}
+     /// A Boolean value that determines whether the object should be included in clustering operations.
+     ///
+     /// The default value is `true`.
+     let shouldCluster: Bool { get }
+ }
+
+ public extension CoordinateIdentifiable {
+     let shouldCluster: Bool { true }
+ }
