@@ -22,7 +22,7 @@ import Foundation
 /// ```
 public protocol CoordinateIdentifiable {
      /// The geographical coordinate of the object.
-     var coordinate: CLLocationCoordinate2D { get }
+     var coordinate: CLLocationCoordinate2D { get set }
 
      /// A Boolean value that determines whether the object should be included in clustering operations.
      ///
