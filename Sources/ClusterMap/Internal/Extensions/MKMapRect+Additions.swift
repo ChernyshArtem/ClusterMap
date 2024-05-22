@@ -21,8 +21,10 @@ extension MKMapRect {
         contains(MKMapPoint(coordinate))
     }
 
-    init(region: MKCoordinateRegion) {
+   init(region: MKCoordinateRegion) {
         self.init()
+        
+        var isChangeLongitude = false
         
         var topLeft = CLLocationCoordinate2D(
             latitude: min(region.center.latitude + (region.span.latitudeDelta / 2), 90),
@@ -35,20 +37,33 @@ extension MKMapRect {
         
         if topLeft.longitude < -180 {
             topLeft.longitude = safeDoubleLat(topLeft.longitude)
+            isChangeLongitude = true
         }
         if bottomRight.longitude > 180 {
             bottomRight.longitude = safeDoubleLat(bottomRight.longitude)
+            isChangeLongitude = true
         }
         
         let topLeftPoint = MKMapPoint(topLeft)
         let bottomRightPoint = MKMapPoint(bottomRight)
         
-        self.init(
-            x: min(topLeftPoint.x, bottomRightPoint.x),
-            y: min(topLeftPoint.y, bottomRightPoint.y),
-            width: max(topLeftPoint.x, bottomRightPoint.x) - min(topLeftPoint.x, bottomRightPoint.x),
-            height: max(topLeftPoint.y, bottomRightPoint.y) - min(topLeftPoint.y, bottomRightPoint.y)
-        )
+        if isChangeLongitude {
+               let world = MKMapRect.world
+
+               self.init(
+                   x: max(topLeftPoint.x, bottomRightPoint.x),
+                   y: world.origin.y,
+                   width: (world.maxX - max(topLeftPoint.x, bottomRightPoint.x)) + min(topLeftPoint.x, bottomRightPoint.x),
+                   height: world.height
+               )
+        } else {
+            self.init(
+                x: min(topLeftPoint.x, bottomRightPoint.x),
+                y: min(topLeftPoint.y, bottomRightPoint.y),
+                width: max(topLeftPoint.x, bottomRightPoint.x) - min(topLeftPoint.x, bottomRightPoint.x),
+                height: max(topLeftPoint.y, bottomRightPoint.y) - min(topLeftPoint.y, bottomRightPoint.y)
+            )
+        }
     }
     
     private func safeDoubleLat(_ n:Double) -> Double {
